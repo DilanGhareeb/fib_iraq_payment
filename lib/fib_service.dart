@@ -2,24 +2,67 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 
+// Define an enum for mode
+enum Mode { stage, dev, prod }
+
 class FIBService {
-  // Step 1: Create a private constructor
-  FIBService._internal();
+  // Private constructor
+  FIBService._internal({
+    required this.clientId,
+    required this.clientSecret,
+    required this.mode,
+  });
 
-  // Step 2: Create a static instance
-  static final FIBService _instance = FIBService._internal();
+  // Static instance (nullable for lazy initialization)
+  static FIBService? _instance;
 
-  // Step 3: Provide a factory constructor to return the single instance
-  factory FIBService() => _instance;
+  // Public factory for initialization and access
+  static FIBService initialize({
+    required String clientId,
+    required String clientSecret,
+    required Mode mode,
+  }) {
+    if (_instance != null) {
+      throw Exception('FIBService has already been initialized.');
+    }
+    _instance = FIBService._internal(
+      clientId: clientId,
+      clientSecret: clientSecret,
+      mode: mode,
+    );
+    return _instance!;
+  }
+
+  // Access the already-initialized instance
+  static FIBService get instance {
+    if (_instance == null) {
+      throw Exception(
+          'FIBService has not been initialized. Call initialize() first.');
+    }
+    return _instance!;
+  }
 
   final Dio _dio = Dio();
-  String clientId = '';
-  String clientSecret = '';
-  String mode = 'stage'; // stage - dev - prod or any other mode
+  final String clientId;
+  final String clientSecret;
+  final Mode mode;
+
+  // Convert mode to string for URLs
+  String get _modeString {
+    switch (mode) {
+      case Mode.stage:
+        return 'stage';
+      case Mode.dev:
+        return 'dev';
+      case Mode.prod:
+        return 'prod';
+    }
+  }
 
   String get _authUrl =>
-      'https://fib.$mode.fib.iq/auth/realms/fib-online-shop/protocol/openid-connect/token';
-  String get _paymentUrl => 'https://fib.$mode.fib.iq/protected/v1/payments';
+      'https://fib.$_modeString.fib.iq/auth/realms/fib-online-shop/protocol/openid-connect/token';
+  String get _paymentUrl =>
+      'https://fib.$_modeString.fib.iq/protected/v1/payments';
 
   Future<String> _getAccessToken() async {
     final response = await _dio.post(

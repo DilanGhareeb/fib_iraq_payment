@@ -3,13 +3,14 @@ import 'dart:typed_data';
 import 'package:fib_iraq_payment/fib_iraq_payment.dart';
 import 'package:flutter/material.dart';
 
-final FIBService fibService = FIBService();
-
 void main() {
   // You can easily get your client ID and client secret by contacting the FIB company.
-  fibService.clientId = 'your client id';
-  fibService.clientSecret = 'your client secret';
-  fibService.mode = 'stage'; // stage - dev - prod or any other mode
+  FIBService.initialize(
+    clientId: 'your client id',
+    clientSecret: 'your client secret',
+    mode: Mode.stage,
+  );
+  // stage - dev - prod or any other mode (Mode.stage, Mode.dev, Mode.prod).
   runApp(const FIBPaymentApp());
 }
 
@@ -32,11 +33,11 @@ class PaymentScreen extends StatefulWidget {
   const PaymentScreen({super.key});
 
   @override
-  _PaymentScreenState createState() => _PaymentScreenState();
+  State<PaymentScreen> createState() => _PaymentScreenState();
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  final FIBService fibService = FIBService();
+  final FIBService fibService = FIBService.instance;
   String _paymentId = '';
   String _status = 'No Payment Yet';
   Uint8List? _qrCodeImage;
