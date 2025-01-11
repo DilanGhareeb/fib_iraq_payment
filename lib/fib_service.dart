@@ -3,10 +3,20 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 
 class FIBService {
+  // Step 1: Create a private constructor
+  FIBService._internal();
+
+  // Step 2: Create a static instance
+  static final FIBService _instance = FIBService._internal();
+
+  // Step 3: Provide a factory constructor to return the single instance
+  factory FIBService() => _instance;
+
   final Dio _dio = Dio();
   String clientId = '';
   String clientSecret = '';
   String mode = 'stage'; // stage - dev - prod or any other mode
+
   String get _authUrl =>
       'https://fib.$mode.fib.iq/auth/realms/fib-online-shop/protocol/openid-connect/token';
   String get _paymentUrl => 'https://fib.$mode.fib.iq/protected/v1/payments';
